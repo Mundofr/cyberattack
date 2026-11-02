@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>CYBER-MECH SHOOTER 2099</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        body {
+            background-color: #05050a;
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .neon-text-cyan {
+            text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff, 0 0 40px #00f3ff;
+        }
+        .neon-text-pink {
+            text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055, 0 0 40px #ff0055;
+        }
+        .cyber-card {
+            background: rgba(10, 15, 30, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            clip-path: polygon(0 0, 95% 0, 100% 10%, 100% 100%, 5% 100%, 0 90%);
+        }
+
+        .cyber-button {
+            position: relative;
+            background: linear-gradient(135deg, rgba(0, 243, 255, 0.1), rgba(255, 0, 85, 0.2));
+            border: 1px solid #00f3ff;
+            transition: all 0.2s ease;
+            clip-path: polygon(0 0, 90% 0, 100% 30%, 100% 100%, 10% 100%, 0 70%);
+        }
+        .cyber-button:hover {
+            background: linear-gradient(135deg, rgba(0, 243, 255, 0.4), rgba(255, 0, 85, 0.5));
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+            transform: translateY(-2px);
+        }
+
+        #gameCanvas {
+            background: radial-gradient(circle at center, #0f1428 0%, #05060c 100%);
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .modal-bg {
+            background: rgba(4, 6, 14, 0.85);
+            backdrop-filter: blur(8px);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(5, 5, 10, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00f3ff;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen flex justify-center items-center relative select-none overflow-hidden">
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div id="app-container" class="relative w-full h-full max-w-[1024px] max-h-[768px] flex flex-col justify-center items-center bg-black shadow-2xl overflow-hidden border border-cyan-500/30">
+
+        <!-- HEADER DE MONEDAS -->
+        <div id="top-currency-bar" class="absolute top-3 right-4 z-40 flex gap-4 bg-slate-900/80 px-4 py-2 rounded-full border border-cyan-500/30 backdrop-blur-md">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-coins text-amber-400 text-lg"></i>
+                <span id="gold-display" class="font-orbitron font-bold text-amber-400 text-sm md:text-base">0</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-gem text-cyan-400 text-lg"></i>
+                <span id="gems-display" class="font-orbitron font-bold text-cyan-400 text-sm md:text-base">0</span>
+            </div>
+            <button onclick="openIAPModal()" class="ml-2 bg-pink-600 hover:bg-pink-500 text-xs px-2 py-1 rounded text-white font-bold transition-all shadow-[0_0_10px_#ff0055]">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </div>
+
+        <!-- MENÚ PRINCIPAL -->
+        <div id="main-menu" class="absolute inset-0 z-30 flex flex-col justify-between items-center p-6 bg-gradient-to-b from-slate-950/80 via-slate-900/90 to-black">
+            <div class="mt-10 text-center">
+                <p class="text-cyan-400 font-orbitron tracking-widest text-xs md:text-sm uppercase mb-1">PROTOCOLO ARCADE V2.7</p>
+                <h1 class="text-4xl md:text-7xl font-orbitron font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-purple-500 neon-text-cyan">
+                    CYBER-MECH
+                </h1>
+                <p class="text-pink-500 font-orbitron tracking-[0.3em] text-lg md:text-2xl font-bold">SHOOTER 2099</p>
+            </div>
+
+            <div class="flex flex-col items-center justify-center my-4">
+                <div id="menu-mech-preview" class="w-32 h-32 md:w-44 md:h-44 relative flex items-center justify-center"></div>
+                <p id="menu-mech-name" class="font-orbitron font-bold text-cyan-300 text-lg md:text-xl mt-2">SCOUT-X1</p>
+            </div>
+
+            <div class="w-full max-w-sm flex flex-col gap-3 mb-6">
+                <button onclick="startGame()" class="cyber-button py-4 font-orbitron font-black text-xl md:text-2xl text-cyan-300 tracking-wider flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-play"></i> INICIAR JUEGO
+                </button>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="openShopModal()" class="cyber-button py-3 font-orbitron font-bold text-base text-amber-300 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-robot"></i> TIENDA MECHS
+                    </button>
+                    <button onclick="openIAPModal()" class="cyber-button py-3 font-orbitron font-bold text-base text-pink-400 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-gem"></i> BANCO & CAMBIO
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-xs text-slate-500 font-mono">
+                DESLIZA DEDO / TECLAS DIRECCIONALES PARA MOVER • ESPACIO PARA DISPARAR
+            </div>
+        </div>
+
+        <!-- CANVAS DEL JUEGO -->
+        <canvas id="gameCanvas" width="800" height="900" class="w-full h-full"></canvas>
+
+        <!-- HUD DEL JUEGO -->
+        <div id="game-hud" class="absolute inset-0 z-20 pointer-events-none hidden flex flex-col justify-between p-4">
+            <div class="flex justify-between items-start w-full">
+                <div class="flex flex-col gap-1">
+                    <div id="hud-lives" class="flex gap-1 text-pink-500 text-lg md:text-xl filter drop-shadow-[0_0_5px_#ff0055]"></div>
+                    <div class="bg-slate-900/80 px-3 py-1 rounded border border-cyan-500/30 backdrop-blur">
+                        <span class="font-orbitron text-xs text-slate-400">NIVEL: </span>
+                        <span id="hud-level" class="font-orbitron font-bold text-cyan-400">1</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-end gap-1">
+                    <div class="bg-slate-900/80 px-4 py-1.5 rounded border border-cyan-500/30 backdrop-blur text-right">
+                        <p class="font-orbitron text-[10px] text-slate-400 uppercase tracking-widest">PUNTAJE</p>
+                        <p id="hud-score" class="font-orbitron font-black text-lg md:text-2xl text-cyan-400 neon-text-cyan">0</p>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-slate-900/80 px-3 py-1 rounded border border-amber-500/30">
+                        <i class="fa-solid fa-coins text-amber-400 text-xs"></i>
+                        <span id="hud-gold" class="font-orbitron font-bold text-amber-400 text-sm">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full flex justify-between items-end pb-2 md:hidden">
+                <div class="text-slate-500/60 text-xs font-mono bg-black/40 px-3 py-1 rounded">
+                    <i class="fa-solid fa-hand-pointer animate-pulse mr-1"></i> Desliza para mover
+                </div>
+                <button id="mobile-shoot-btn" class="pointer-events-auto cyber-button w-16 h-16 rounded-full flex items-center justify-center text-cyan-400 text-xl border-cyan-400/50 active:bg-cyan-500/40">
+                    <i class="fa-solid fa-crosshairs"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- MODAL TIENDA -->
+        <div id="shop-modal" class="absolute inset-0 z-50 hidden modal-bg flex items-center justify-center p-4">
+            <div class="cyber-card w-full max-w-2xl max-h-[90vh] flex flex-col p-5 relative overflow-hidden border-cyan-500/50">
+                <div class="flex justify-between items-center pb-3 border-b border-cyan-500/30">
+                    <h2 class="font-orbitron font-black text-xl md:text-2xl text-cyan-400 flex items-center gap-2">
+                        <i class="fa-solid fa-robot"></i> TIENDA DE MECHS & SKINS
+                    </h2>
+                    <button onclick="closeShopModal()" class="text-slate-400 hover:text-white text-xl">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div id="mechs-list" class="flex-1 overflow-y-auto my-4 pr-1 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+                <div class="pt-3 border-t border-cyan-500/30 flex justify-end">
+                    <button onclick="closeShopModal()" class="cyber-button px-6 py-2 font-orbitron font-bold text-sm text-cyan-300">
+                        CERRAR TIENDA
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL GEMAS & INTERCAMBIO -->
+        <div id="iap-modal" class="absolute inset-0 z-50 hidden modal-bg flex items-center justify-center p-4">
+            <div class="cyber-card w-full max-w-md max-h-[90vh] flex flex-col p-5 relative border-pink-500/50 overflow-y-auto">
+                <div class="flex justify-between items-center pb-3 border-b border-pink-500/30">
+                    <h2 class="font-orbitron font-black text-xl text-pink-500 flex items-center gap-2">
+                        <i class="fa-solid fa-gem"></i> BANCO & INTERCAMBIO
+                    </h2>
+                    <button onclick="closeIAPModal()" class="text-slate-400 hover:text-white text-xl">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <p class="text-xs font-orbitron font-bold text-cyan-400 mt-3 uppercase tracking-wider">1. OBTENER GEMAS PREMIUM</p>
+
+                <div class="flex flex-col gap-3 my-2">
+                    <div class="flex justify-between items-center bg-slate-900/80 p-3 rounded border border-cyan-500/20">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-gem text-cyan-400 text-2xl"></i>
+                            <div>
+                                <p class="font-orbitron font-bold text-white text-sm">BOLSA DE GEMAS</p>
+                                <p class="text-xs text-cyan-400 font-bold">+50 GEMAS</p>
+                            </div>
+                        </div>
+                        <button onclick="buyGemsPackage(50, '$0.99')" class="cyber-button px-4 py-2 font-orbitron font-bold text-xs text-emerald-400 border-emerald-400">$0.99 USD</button>
+                    </div>
+
+                    <div class="flex justify-between items-center bg-slate-900/80 p-3 rounded border border-pink-500/30">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-gem text-pink-400 text-2xl"></i>
+                            <div>
+                                <p class="font-orbitron font-bold text-white text-sm">COFRE DE GEMAS</p>
+                                <p class="text-xs text-pink-400 font-bold">+150 GEMAS</p>
+                            </div>
+                        </div>
+                        <button onclick="buyGemsPackage(150, '$2.99')" class="cyber-button px-4 py-2 font-orbitron font-bold text-xs text-emerald-400 border-emerald-400">$2.99 USD</button>
+                    </div>
+
+                    <div class="flex justify-between items-center bg-slate-900/80 p-3 rounded border border-amber-500/40">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-gem text-amber-400 text-2xl"></i>
+                            <div>
+                                <p class="font-orbitron font-bold text-white text-sm">NÚCLEO CYBER</p>
+                                <p class="text-xs text-amber-400 font-bold">+500 GEMAS</p>
+                            </div>
+                        </div>
+                        <button onclick="buyGemsPackage(500, '$8.99')" class="cyber-button px-4 py-2 font-orbitron font-bold text-xs text-emerald-400 border-emerald-400">$8.99 USD</button>
+                    </div>
+                </div>
+
+                <p class="text-xs font-orbitron font-bold text-amber-400 mt-4 uppercase tracking-wider">2. CAMBIAR GEMAS POR ORO 🪙</p>
+
+                <div class="flex flex-col gap-3 my-2">
+                    <div class="flex justify-between items-center bg-slate-900/80 p-3 rounded border border-amber-500/20">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-coins text-amber-400 text-2xl"></i>
+                            <div>
+                                <p class="font-orbitron font-bold text-white text-sm">BOLSA DE MONEDAS</p>
+                                <p class="text-xs text-amber-400 font-bold">+1,500 ORO</p>
+                            </div>
+                        </div>
+                        <button onclick="exchangeGemsForGold(100, 1500)" class="cyber-button px-4 py-2 font-orbitron font-bold text-xs text-cyan-300 border-cyan-400">
+                            <i class="fa-solid fa-gem mr-1"></i> 100
+                        </button>
+                    </div>
+
+                    <div class="flex justify-between items-center bg-slate-900/80 p-3 rounded border border-amber-500/30">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-sack-dollar text-amber-400 text-2xl"></i>
+                            <div>
+                                <p class="font-orbitron font-bold text-white text-sm">COFRE ABUNDANTE</p>
+                                <p class="text-xs text-amber-400 font-bold">+4,500 ORO</p>
+                            </div>
+                        </div>
+                        <button onclick="exchangeGemsForGold(250, 4500)" class="cyber-button px-4 py-2 font-orbitron font-bold text-xs text-cyan-300 border-cyan-400">
+                            <i class="fa-solid fa-gem mr-1"></i> 250
+                        </button>
+                    </div>
+
+                    <div class="flex justify-between items-center bg-slate-900/80 p-3 rounded border border-amber-500/50">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-vault text-amber-400 text-2xl"></i>
+                            <div>
+                                <p class="font-orbitron font-bold text-white text-sm">RESERVA IMPERIAL</p>
+                                <p class="text-xs text-amber-400 font-bold">+10,000 ORO</p>
+                            </div>
+                        </div>
+                        <button onclick="exchangeGemsForGold(500, 10000)" class="cyber-button px-4 py-2 font-orbitron font-bold text-xs text-cyan-300 border-cyan-400">
+                            <i class="fa-solid fa-gem mr-1"></i> 500
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL GAME OVER -->
+        <div id="gameover-modal" class="absolute inset-0 z-50 hidden modal-bg flex items-center justify-center p-4">
+            <div class="cyber-card w-full max-w-sm flex flex-col items-center p-6 text-center border-red-500/50">
+                <i class="fa-solid fa-triangle-exclamation text-red-500 text-4xl mb-2 animate-bounce"></i>
+                <h2 class="font-orbitron font-black text-2xl md:text-3xl text-red-500 neon-text-pink mb-1">
+                    SISTEMA DESTRUIDO
+                </h2>
+                <p class="text-xs text-slate-400 font-mono mb-4">MISIÓN ABORTADA</p>
+
+                <div class="w-full bg-slate-900/90 p-4 rounded border border-slate-800 flex flex-col gap-2 my-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">Puntaje Final:</span>
+                        <span id="go-score" class="font-orbitron font-bold text-cyan-400">0</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">Nivel Alcanzado:</span>
+                        <span id="go-level" class="font-orbitron font-bold text-purple-400">1</span>
+                    </div>
+                    <div class="flex justify-between text-sm pt-2 border-t border-slate-800">
+                        <span class="text-slate-400">Oro Recolectado:</span>
+                        <span id="go-gold" class="font-orbitron font-bold text-amber-400">+0</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col w-full gap-3 mt-4">
+                    <button onclick="startGame()" class="cyber-button py-3 font-orbitron font-bold text-base text-cyan-300">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> REINTENTAR
+                    </button>
+                    <button onclick="returnToMenu()" class="cyber-button py-2.5 font-orbitron font-bold text-sm text-slate-400">
+                        <i class="fa-solid fa-house mr-2"></i> MENÚ PRINCIPAL
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const MECHS = [
+            {
+                id: 'scout',
+                name: 'CYBER SCOUT',
+                desc: 'Unidad de reconocimiento ágil con cañón rápido balanceado.',
+                priceType: 'gold',
+                price: 0,
+                color: '#00f3ff',
+                secondaryColor: '#006699',
+                stats: { speed: 8, maxHp: 3, fireRate: 15, damage: 1, bulletType: 'single' }
+            },
+            {
+                id: 'titan',
+                name: 'VULCAN TITAN',
+                desc: 'Blindaje pesadamente reforzado con mayor capacidad de supervivencia.',
+                priceType: 'gold',
+                price: 500,
+                color: '#ffaa00',
+                secondaryColor: '#885500',
+                stats: { speed: 6, maxHp: 5, fireRate: 18, damage: 1.5, bulletType: 'single' }
+            },
+            {
+                id: 'nova',
+                name: 'PLASMA NOVA',
+                desc: 'Equipado con cañones dobles de plasma de alta frecuencia.',
+                priceType: 'gold',
+                price: 1500,
+                color: '#ff0055',
+                secondaryColor: '#880033',
+                stats: { speed: 9, maxHp: 4, fireRate: 10, damage: 1, bulletType: 'double' }
+            },
+            {
+                id: 'omega',
+                name: 'OMEGA DESTROYER',
+                desc: 'El mecha supremo. Disparo de dispersión triple y alta velocidad.',
+                priceType: 'gems',
+                price: 120,
+                color: '#a855f7',
+                secondaryColor: '#581c87',
+                stats: { speed: 10, maxHp: 6, fireRate: 8, damage: 2, bulletType: 'triple' }
+            }
+        ];
+
+        let playerData = {
+            gold: 0,
+            gems: 10,
+            unlockedMechs: ['scout'],
+            equippedMech: 'scout'
+        };
+
+        function loadPlayerData() {
+            const saved = localStorage.getItem('CYBER_MECH_SAVE');
+            if (saved) {
+                try {
+                    playerData = { ...playerData, ...JSON.parse(saved) };
+                } catch(e) {
+                    console.error("Error al cargar datos", e);
+                }
+            }
+            updateCurrencyUI();
+        }
+
+        function savePlayerData() {
+            localStorage.setItem('CYBER_MECH_SAVE', JSON.stringify(playerData));
+            updateCurrencyUI();
+        }
+
+        function updateCurrencyUI() {
+            document.getElementById('gold-display').innerText = playerData.gold;
+            document.getElementById('gems-display').innerText = playerData.gems;
+            
+            const currentMech = MECHS.find(m => m.id === playerData.equippedMech);
+            if (currentMech) {
+                document.getElementById('menu-mech-name').innerText = currentMech.name;
+                document.getElementById('menu-mech-name').style.color = currentMech.color;
+                renderMechPreview('menu-mech-preview', currentMech);
+            }
+        }
+
+        function renderMechPreview(containerId, mech) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `
+                <svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow-[0_0_12px_${mech.color}] animate-pulse">
+                    <rect x="35" y="75" width="10" height="15" fill="#ff5500" rx="2" />
+                    <rect x="55" y="75" width="10" height="15" fill="#ff5500" rx="2" />
+                    <polygon points="15,65 35,45 35,75" fill="${mech.secondaryColor}" />
+                    <polygon points="85,65 65,45 65,75" fill="${mech.secondaryColor}" />
+                    <polygon points="50,15 75,50 65,80 35,80 25,50" fill="${mech.color}" />
+                    <circle cx="50" cy="45" r="12" fill="#000" stroke="#fff" stroke-width="2"/>
+                    <circle cx="50" cy="45" r="6" fill="${mech.color}" />
+                    <rect x="20" y="35" width="6" height="25" fill="#aaa" rx="2"/>
+                    <rect x="74" y="35" width="6" height="25" fill="#aaa" rx="2"/>
+                </svg>
+            `;
+        }
+
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let gameState = 'MENU';
+        let score = 0;
+        let level = 1;
+        let lives = 3;
+        let goldEarnedInRun = 0;
+        let keys = {};
+        let touchX = null;
+        let touchY = null;
+        let shootTimer = 0;
+        let enemySpawnTimer = 0;
+        let boss = null;
+
+        let player = {
+            x: 400,
+            y: 720,
+            width: 60,
+            height: 60,
+            mech: MECHS[0]
+        };
+        let bullets = [];
+        let enemies = [];
+        let particles = [];
+        let floatingTexts = [];
+
+        window.addEventListener("keydown", (e) => {
+            keys[e.code] = true;
+            if (e.code === "Space" && gameState === 'PLAYING') {
+                e.preventDefault();
+            }
+        });
+        window.addEventListener("keyup", (e) => keys[e.code] = false);
+
+        canvas.addEventListener("touchstart", handleTouch, { passive: false });
+        canvas.addEventListener("touchmove", handleTouch, { passive: false });
+        canvas.addEventListener("touchend", () => { 
+            touchX = null; 
+            touchY = null;
+        });
+
+        function handleTouch(e) {
+            if (gameState !== 'PLAYING') return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches[0].clientX - rect.left;
+            const clientY = e.touches[0].clientY - rect.top;
+            
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            touchX = clientX * scaleX;
+            touchY = (clientY * scaleY) - 140; 
+        }
+
+        document.getElementById('mobile-shoot-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameState === 'PLAYING') fireBullets();
+        });
+
+        function startGame() {
+            const equipped = MECHS.find(m => m.id === playerData.equippedMech) || MECHS[0];
+            player.mech = equipped;
+            player.width = 60;
+            player.height = 60;
+            player.x = canvas.width / 2 - player.width / 2;
+            player.y = canvas.height - 180;
+            
+            score = 0;
+            level = 1;
+            lives = equipped.stats.maxHp;
+            goldEarnedInRun = 0;
+            bullets = [];
+            enemies = [];
+            particles = [];
+            floatingTexts = [];
+            boss = null;
+            
+            gameState = 'PLAYING';
+            
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('gameover-modal').classList.add('hidden');
+            document.getElementById('game-hud').classList.remove('hidden');
+            
+            updateHUD();
+        }
+
+        function returnToMenu() {
+            gameState = 'MENU';
+            document.getElementById('main-menu').classList.remove('hidden');
+            document.getElementById('game-hud').classList.add('hidden');
+            document.getElementById('gameover-modal').classList.add('hidden');
+            updateCurrencyUI();
+        }
+
+        function triggerGameOver() {
+            gameState = 'GAMEOVER';
+            playerData.gold += goldEarnedInRun;
+            savePlayerData();
+
+            document.getElementById('go-score').innerText = score;
+            document.getElementById('go-level').innerText = level;
+            document.getElementById('go-gold').innerText = `+${goldEarnedInRun}`;
+            document.getElementById('gameover-modal').classList.remove('hidden');
+        }
+
+        function updateHUD() {
+            document.getElementById('hud-score').innerText = score;
+            document.getElementById('hud-level').innerText = level;
+            document.getElementById('hud-gold').innerText = goldEarnedInRun;
+            
+            let heartsHTML = '';
+            for (let i = 0; i < player.mech.stats.maxHp; i++) {
+                if (i < lives) {
+                    heartsHTML += '<i class="fa-solid fa-heart text-pink-500"></i>';
+                } else {
+                    heartsHTML += '<i class="fa-solid fa-heart text-slate-700"></i>';
+                }
+            }
+            document.getElementById('hud-lives').innerHTML = heartsHTML;
+        }
+
+        function fireBullets() {
+            const stats = player.mech.stats;
+            const bSpeed = 12;
+            const pX = player.x + player.width / 2;
+            const pY = player.y;
+
+            if (stats.bulletType === 'single') {
+                bullets.push({ x: pX - 4, y: pY, vx: 0, vy: -bSpeed, damage: stats.damage, color: player.mech.color });
+            } else if (stats.bulletType === 'double') {
+                bullets.push({ x: pX - 16, y: pY, vx: 0, vy: -bSpeed, damage: stats.damage, color: player.mech.color });
+                bullets.push({ x: pX + 8, y: pY, vx: 0, vy: -bSpeed, damage: stats.damage, color: player.mech.color });
+            } else if (stats.bulletType === 'triple') {
+                bullets.push({ x: pX - 4, y: pY, vx: 0, vy: -bSpeed, damage: stats.damage, color: player.mech.color });
+                bullets.push({ x: pX - 14, y: pY, vx: -2, vy: -bSpeed * 0.95, damage: stats.damage, color: player.mech.color });
+                bullets.push({ x: pX + 6, y: pY, vx: 2, vy: -bSpeed * 0.95, damage: stats.damage, color: player.mech.color });
+            }
+        }
+
+        function update() {
+            if (gameState !== 'PLAYING') return;
+
+            const speed = player.mech.stats.speed;
+            if ((keys["ArrowLeft"] || keys["KeyA"]) && player.x > 0) {
+                player.x -= speed;
+            }
+            if ((keys["ArrowRight"] || keys["KeyD"]) && player.x < canvas.width - player.width) {
+                player.x += speed;
+            }
+            if ((keys["ArrowUp"] || keys["KeyW"]) && player.y > 50) {
+                player.y -= speed;
+            }
+            if ((keys["ArrowDown"] || keys["KeyS"]) && player.y < canvas.height - player.height - 50) {
+                player.y += speed;
+            }
+
+            if (touchX !== null && touchY !== null) {
+                const targetX = touchX - player.width / 2;
+                const targetY = Math.max(50, Math.min(canvas.height - player.height - 60, touchY));
+                
+                player.x += (targetX - player.x) * 0.25;
+                player.y += (targetY - player.y) * 0.25;
+                
+                if (player.x < 0) player.x = 0;
+                if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
+            }
+
+            shootTimer++;
+            if ((keys["Space"] || touchX !== null) && shootTimer >= player.mech.stats.fireRate) {
+                fireBullets();
+                shootTimer = 0;
+            }
+
+            bullets.forEach((b, index) => {
+                b.x += b.vx;
+                b.y += b.vy;
+                if (b.y < -20 || b.x < 0 || b.x > canvas.width) {
+                    bullets.splice(index, 1);
+                }
+            });
+
+            enemySpawnTimer++;
+            const spawnInterval = Math.max(25, 70 - (level * 6));
+            
+            if (level % 5 === 0 && !boss && enemies.length === 0) {
+                boss = {
+                    x: canvas.width / 2 - 80,
+                    y: -150,
+                    targetY: 80,
+                    width: 160,
+                    height: 120,
+                    hp: 50 + (level * 20),
+                    maxHp: 50 + (level * 20),
+                    color: '#ff0055',
+                    dir: 1
+                };
+            }
+
+            if (!boss && enemySpawnTimer >= spawnInterval) {
+                enemySpawnTimer = 0;
+                const eSize = Math.random() * 20 + 35;
+                const eHp = 1 + Math.floor(level / 3);
+                enemies.push({
+                    x: Math.random() * (canvas.width - eSize),
+                    y: -eSize,
+                    width: eSize,
+                    height: eSize,
+                    speed: Math.random() * (2 + level * 0.4) + 1.5,
+                    hp: eHp,
+                    maxHp: eHp,
+                    color: level % 2 === 0 ? '#ffaa00' : '#00f3ff'
+                });
+            }
+
+            if (boss) {
+                if (boss.y < boss.targetY) boss.y += 2;
+                boss.x += boss.dir * (2 + level * 0.2);
+                if (boss.x <= 20 || boss.x >= canvas.width - boss.width - 20) {
+                    boss.dir *= -1;
+                }
+
+                if (Math.random() < 0.03) {
+                    particles.push({
+                        x: boss.x + boss.width / 2,
+                        y: boss.y + boss.height,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: 5,
+                        radius: 6,
+                        color: '#ff0055',
+                        isEnemyBullet: true,
+                        alpha: 1,
+                        decay: 0
+                    });
+                }
+            }
+
+            enemies.forEach((enemy, eIndex) => {
+                enemy.y += enemy.speed;
+
+                if (enemy.y > canvas.height) {
+                    enemies.splice(eIndex, 1);
+                    takeDamage(1);
+                }
+
+                if (checkCollision(enemy, player)) {
+                    createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, enemy.color);
+                    enemies.splice(eIndex, 1);
+                    takeDamage(1);
+                }
+
+                bullets.forEach((bullet, bIndex) => {
+                    if (checkCollision(bullet, enemy)) {
+                        enemy.hp -= bullet.damage;
+                        createExplosion(bullet.x, bullet.y, bullet.color, 4);
+                        bullets.splice(bIndex, 1);
+
+                        if (enemy.hp <= 0) {
+                            createExplosion(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, enemy.color, 16);
+                            enemies.splice(eIndex, 1);
+                            
+                            const goldGained = Math.floor(Math.random() * 3) + 2;
+                            goldEarnedInRun += goldGained;
+                            score += 15;
+                            addFloatingText(`+${goldGained} G`, enemy.x, enemy.y, '#ffd700');
+
+                            checkLevelUp();
+                        }
+                    }
+                });
+            });
+
+            // Colisiones seguras con el Jefe (Soluciona el congelamiento)
+            if (boss) {
+                bullets.forEach((bullet, bIndex) => {
+                    if (boss && checkCollision(bullet, boss)) {
+                        boss.hp -= bullet.damage;
+                        createExplosion(bullet.x, bullet.y, bullet.color, 5);
+                        bullets.splice(bIndex, 1);
+
+                        if (boss.hp <= 0) {
+                            createExplosion(boss.x + boss.width / 2, boss.y + boss.height / 2, '#ff0055', 40);
+                            const goldGained = 50 + (level * 10);
+                            goldEarnedInRun += goldGained;
+                            score += 500;
+                            addFloatingText(`¡JEFE DESTRUIDO! +${goldGained}G`, boss.x, boss.y - 20, '#00f3ff');
+                            
+                            boss = null; 
+                            level++;    
+                            
+                            savePlayerData();
+                            updateHUD();
+                        }
+                    }
+                });
+            }
+
+            particles.forEach((p, pIndex) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                
+                if (p.isEnemyBullet) {
+                    if (checkCollision({ x: p.x - p.radius, y: p.y - p.radius, width: p.radius * 2, height: p.radius * 2 }, player)) {
+                        takeDamage(1);
+                        particles.splice(pIndex, 1);
+                    }
+                    if (p.y > canvas.height) particles.splice(pIndex, 1);
+                } else {
+                    p.alpha -= p.decay;
+                    if (p.alpha <= 0) particles.splice(pIndex, 1);
+                }
+            });
+
+            floatingTexts.forEach((ft, ftIndex) => {
+                ft.y -= 1;
+                ft.alpha -= 0.02;
+                if (ft.alpha <= 0) floatingTexts.splice(ftIndex, 1);
+            });
+        }
+
+        function takeDamage(amount) {
+            lives -= amount;
+            createExplosion(player.x + player.width / 2, player.y + player.height / 2, '#ff0055', 20);
+            updateHUD();
+
+            if (lives <= 0) {
+                triggerGameOver();
+            }
+        }
+
+        function checkLevelUp() {
+            let nextLevelScore = level * 150;
+            if (score >= nextLevelScore) {
+                level++;
+                addFloatingText(`¡NIVEL ${level}!`, canvas.width / 2 - 50, 300, '#00f3ff');
+                updateHUD();
+            }
+        }
+
+        function checkCollision(rect1, rect2) {
+            if (!rect1 || !rect2) return false;
+            return (
+                rect1.x < rect2.x + (rect2.width || 8) &&
+                rect1.x + (rect1.width || 8) > rect2.x &&
+                rect1.y < rect2.y + (rect2.height || 8) &&
+                rect1.y + (rect1.height || 8) > rect2.y
+            );
+        }
+
+        function createExplosion(x, y, color, count = 14) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8,
+                    radius: Math.random() * 3 + 2,
+                    color: color,
+                    alpha: 1,
+                    decay: Math.random() * 0.04 + 0.02
+                });
+            }
+        }
+
+        function addFloatingText(text, x, y, color) {
+            floatingTexts.push({ text, x, y, color, alpha: 1 });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = "rgba(0, 243, 255, 0.05)";
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+
+            if (gameState === 'PLAYING') {
+                drawMech(ctx, player.x, player.y, player.width, player.height, player.mech);
+
+                bullets.forEach(b => {
+                    ctx.save();
+                    ctx.fillStyle = b.color;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = b.color;
+                    ctx.fillRect(b.x, b.y, 8, 18);
+                    ctx.restore();
+                });
+
+                enemies.forEach(e => {
+                    ctx.save();
+                    ctx.fillStyle = e.color;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = e.color;
+                    ctx.beginPath();
+                    ctx.moveTo(e.x + e.width / 2, e.y + e.height);
+                    ctx.lineTo(e.x + e.width, e.y);
+                    ctx.lineTo(e.x + e.width / 2, e.y + 10);
+                    ctx.lineTo(e.x, e.y);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                });
+
+                // DIBUJO DEL JEFE Y SU BARRA DE VIDA ARRIBA DE SU CABEZA
+                if (boss) {
+                    ctx.save();
+                    ctx.fillStyle = boss.color;
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = boss.color;
+                    ctx.beginPath();
+                    ctx.moveTo(boss.x + boss.width / 2, boss.y + boss.height);
+                    ctx.lineTo(boss.x + boss.width, boss.y + 20);
+                    ctx.lineTo(boss.x + boss.width - 20, boss.y);
+                    ctx.lineTo(boss.x + 20, boss.y);
+                    ctx.lineTo(boss.x, boss.y + 20);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.arc(boss.x + boss.width / 2, boss.y + 40, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+
+                    // --- BARRA DE VIDA FLOTANTE SOBRE EL JEFE ---
+                    const barWidth = boss.width;
+                    const barHeight = 8;
+                    const barX = boss.x;
+                    const barY = boss.y - 20; 
+                    const hpPercent = Math.max(0, boss.hp / boss.maxHp);
+
+                    ctx.save();
+                    ctx.fillStyle = "rgba(10, 15, 30, 0.9)";
+                    ctx.strokeStyle = "#ff0055";
+                    ctx.lineWidth = 1;
+                    ctx.fillRect(barX, barY, barWidth, barHeight);
+                    ctx.strokeRect(barX, barY, barWidth, barHeight);
+
+                    ctx.fillStyle = "#ff0055";
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = "#ff0055";
+                    ctx.fillRect(barX, barY, barWidth * hpPercent, barHeight);
+
+                    ctx.font = "bold 10px Orbitron";
+                    ctx.fillStyle = "#ff0055";
+                    ctx.textAlign = "center";
+                    ctx.fillText("JEFE MECH", boss.x + boss.width / 2, barY - 4);
+                    ctx.restore();
+                }
+
+                particles.forEach(p => {
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.shadowBlur = p.isEnemyBullet ? 10 : 0;
+                    ctx.shadowColor = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                });
+
+                floatingTexts.forEach(ft => {
+                    ctx.save();
+                    ctx.globalAlpha = ft.alpha;
+                    ctx.font = "bold 16px Orbitron";
+                    ctx.fillStyle = ft.color;
+                    ctx.fillText(ft.text, ft.x, ft.y);
+                    ctx.restore();
+                });
+            }
+        }
+
+        function drawMech(context, x, y, width, height, mech) {
+            context.save();
+            context.shadowBlur = 12;
+            context.shadowColor = mech.color;
+
+            context.fillStyle = "#ff5500";
+            context.fillRect(x + width / 2 - 8, y + height - 5, 6, 12 + Math.random() * 6);
+            context.fillRect(x + width / 2 + 2, y + height - 5, 6, 12 + Math.random() * 6);
+
+            context.fillStyle = mech.color;
+            context.beginPath();
+            context.moveTo(x + width / 2, y);
+            context.lineTo(x + width, y + height * 0.7);
+            context.lineTo(x + width * 0.8, y + height);
+            context.lineTo(x + width * 0.2, y + height);
+            context.lineTo(x, y + height * 0.7);
+            context.closePath();
+            context.fill();
+
+            context.fillStyle = mech.secondaryColor;
+            context.fillRect(x + width * 0.3, y + height * 0.3, width * 0.4, height * 0.4);
+
+            context.fillStyle = "#ffffff";
+            context.beginPath();
+            context.arc(x + width / 2, y + height * 0.5, 6, 0, Math.PI * 2);
+            context.fill();
+
+            context.restore();
+        }
+
+        function openShopModal() {
+            renderShopList();
+            document.getElementById('shop-modal').classList.remove('hidden');
+        }
+
+        function closeShopModal() {
+            document.getElementById('shop-modal').classList.add('hidden');
+            updateCurrencyUI();
+        }
+
+        function openIAPModal() {
+            document.getElementById('iap-modal').classList.remove('hidden');
+        }
+
+        function closeIAPModal() {
+            document.getElementById('iap-modal').classList.add('hidden');
+        }
+
+        function buyGemsPackage(amount, priceStr) {
+            playerData.gems += amount;
+            savePlayerData();
+            alert(`¡Compra de ${amount} Gemas realizada! (Simulación ${priceStr})`);
+        }
+
+        function exchangeGemsForGold(gemCost, goldReward) {
+            if (playerData.gems >= gemCost) {
+                playerData.gems -= gemCost;
+                playerData.gold += goldReward;
+                savePlayerData();
+                alert(`¡Canje exitoso! Obtuviste +${goldReward} de Oro por ${gemCost} Gemas.`);
+            } else {
+                alert("¡Gemas insuficientes! Recarga gemas en el paquete de arriba.");
+            }
+        }
+
+        function renderShopList() {
+            const listContainer = document.getElementById('mechs-list');
+            listContainer.innerHTML = '';
+
+            MECHS.forEach(mech => {
+                const isUnlocked = playerData.unlockedMechs.includes(mech.id);
+                const isEquipped = playerData.equippedMech === mech.id;
+
+                const card = document.createElement('div');
+                card.className = `cyber-card p-4 flex flex-col justify-between border ${isEquipped ? 'border-cyan-400 bg-cyan-950/30' : 'border-slate-800'}`;
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-16 h-16 flex-shrink-0">
+                            <svg viewBox="0 0 100 100" class="w-full h-full filter drop-shadow-[0_0_8px_${mech.color}]">
+                                <polygon points="50,15 75,50 65,80 35,80 25,50" fill="${mech.color}" />
+                                <circle cx="50" cy="45" r="8" fill="#fff" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-orbitron font-bold text-base" style="color: ${mech.color}">${mech.name}</h3>
+                            <p class="text-xs text-slate-400 leading-tight">${mech.desc}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-1 my-3 text-[11px] font-mono text-slate-300 bg-slate-950/60 p-2 rounded">
+                        <div>VELOCIDAD: <span class="text-cyan-400">${mech.stats.speed}</span></div>
+                        <div>VIDAS MAX: <span class="text-pink-400">${mech.stats.maxHp}</span></div>
+                        <div>CADENCIA: <span class="text-amber-400">${20 - mech.stats.fireRate}</span></div>
+                        <div>TIPO: <span class="text-purple-400">${mech.stats.bulletType.toUpperCase()}</span></div>
+                    </div>
+
+                    <div>
+                        ${isEquipped ? `
+                            <button class="w-full py-2 bg-cyan-500/20 border border-cyan-400 text-cyan-400 font-orbitron font-bold text-xs rounded tracking-wider cursor-default">
+                                <i class="fa-solid fa-check mr-1"></i> EQUIPADO
+                            </button>
+                        ` : isUnlocked ? `
+                            <button onclick="equipMech('${mech.id}')" class="w-full cyber-button py-2 text-cyan-300 font-orbitron font-bold text-xs">
+                                EQUIPAR MECH
+                            </button>
+                        ` : `
+                            <button onclick="buyMech('${mech.id}')" class="w-full cyber-button py-2 ${mech.priceType === 'gems' ? 'text-pink-400 border-pink-500' : 'text-amber-400 border-amber-500'} font-orbitron font-bold text-xs flex items-center justify-center gap-2">
+                                <i class="fa-solid ${mech.priceType === 'gems' ? 'fa-gem' : 'fa-coins'}"></i> 
+                                COMPRAR (${mech.price} ${mech.priceType === 'gems' ? 'GEMAS' : 'ORO'})
+                            </button>
+                        `}
+                    </div>
+                `;
+
+                listContainer.appendChild(card);
+            });
+        }
+
+        function equipMech(mechId) {
+            playerData.equippedMech = mechId;
+            savePlayerData();
+            renderShopList();
+        }
+
+        function buyMech(mechId) {
+            const mech = MECHS.find(m => m.id === mechId);
+            if (!mech) return;
+
+            if (mech.priceType === 'gold') {
+                if (playerData.gold >= mech.price) {
+                    playerData.gold -= mech.price;
+                    playerData.unlockedMechs.push(mech.id);
+                    playerData.equippedMech = mech.id;
+                    savePlayerData();
+                    renderShopList();
+                } else {
+                    alert("¡Oro insuficiente! Juega más niveles o cambia gemas por oro en el Banco.");
+                }
+            } else if (mech.priceType === 'gems') {
+                if (playerData.gems >= mech.price) {
+                    playerData.gems -= mech.price;
+                    playerData.unlockedMechs.push(mech.id);
+                    playerData.equippedMech = mech.id;
+                    savePlayerData();
+                    renderShopList();
+                } else {
+                    alert("¡Gemas insuficientes! Puedes recargarlas en el banco de gemas.");
+                }
+            }
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.onload = () => {
+            loadPlayerData();
+            requestAnimationFrame(gameLoop);
+        };
+    </script>
+</body>
+</html>
